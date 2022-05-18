@@ -12,6 +12,17 @@ import numpy as np
 from ase.io import write
 from ase.build import sort
 
+def return_frame(inum=0,filename='md.traj',format='vasp'):
+    '''
+    Parse the structure at inum time step
+    '''
+    a=Trajectory(filename)
+    if format == 'vasp':
+        write(f'POSCAR_t{inum}',sort(a[inum]))
+    else:
+        write(f'init_t{inum}.xyz',sort(a[inum]),format='extxyz')
+
+
 def return_last_frame(filename='md.traj',format='vasp'):
     '''
     Parse the last time step structure in POSCAR format
@@ -34,8 +45,7 @@ def return_min_structure(filename='structures.traj'):
 
     write('POSCAR_cand',minarg)
 
-
-def aqs_gen(pos_s=[[0, 0, 0]],mols='Cl',format='vasp')
+def aqs_gen(pos_s=[[0.0,0.0,0.0]],mols='Cl',format='vasp',input=None):
     '''
     Generate aqueous solution input file
     mols: solvent molecule
@@ -58,10 +68,14 @@ def aqs_gen(pos_s=[[0, 0, 0]],mols='Cl',format='vasp')
     del atoms[:3]
     
     #solvent molecule
-    solvent = Atoms(mols, positions=pos_s)
+    if input is not None:
+        solvent=read(input)
+    else:
+        solvent = Atoms(mols, positions=pos_s)
     vol = ((18.01528 / 6.022140857e23) / (0.9982 / 1e24))**(1 / 3.)
     solvent.set_cell((vol, vol, vol))
     solvent.center()
+    print(solvent.positions)
     
     atoms+=solvent
     
