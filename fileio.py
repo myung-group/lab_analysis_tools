@@ -11,6 +11,11 @@ from ase.io.trajectory import Trajectory
 import numpy as np
 from ase.io import write
 from ase.build import sort
+from ase.visualize import view
+from ase import Atoms
+import secrets
+from ase.optimize import BFGS
+from ase.calculators.emt import EMT
 
 def return_frame(inum=0,filename='md.traj',format='vasp'):
     '''
@@ -85,3 +90,31 @@ def aqs_gen(pos_s=[[0.0,0.0,0.0]],mols='Cl',format='vasp',input=None):
         write('POSCAR',atoms)
     else: 
         write('init.xyz',atoms,format='extxyz')
+
+def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz'):
+    '''
+    Random structure generator
+     - Gas phase
+     - Surface?
+    '''
+    
+    emt_element=['H', 'C', 'N', 'O', 'Al', 'Ni', 'Cu', 'Pd', 'Ag', 'Pt', 'Au']
+
+    for i,atom in enumerate(system): 
+        if i>0:
+            disp=np.random.rand(1,3)
+            disp*=d/(np.linalg.norm(disp))
+            iadd=secrets.randbelow(len(atoms))
+            pos=atoms.get_positions()[iadd] + disp
+            atoms+=Atoms(f'{atom}',positions=pos)
+        else:
+            atoms=Atoms(f'{atom}',positions=[[0,0,0]])
+            
+    if [*set(system)][0] in emt_element:
+        atoms.calc=EMT()
+        dyn = BFGS(atoms)
+        dyn.run(fmax=0.01)
+    
+    write(f'{print_xyz}',atoms)
+    
+    return atoms
