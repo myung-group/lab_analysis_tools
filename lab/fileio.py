@@ -139,10 +139,15 @@ def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz', GMIN=True
 
         #freezed substrate here
         with open("freeze", 'w') as f:
-            for i,j in enumerate(range(len(system)+1, len(template)+1, 1)):
-                if i%10:
+            for i,j in enumerate(range(len(system)+1, len(atoms)+1, 1)):
+                if i==0:
+                    f.write(f'\nFREEZE    ')
                     f.write(f' {j} ')
                 else:
-                    f.write(f'\nFREEZE    ')
+                    if i%10:
+                        f.write(f' {j} ')
+                    else:
+                        f.write(f'\nFREEZE    ')
+                        f.write(f' {j} ')
                 
     return atoms
