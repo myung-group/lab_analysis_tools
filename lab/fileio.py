@@ -91,11 +91,11 @@ def aqs_gen(pos_s=[[0.0,0.0,0.0]],mols='Cl',format='vasp',input=None):
     else: 
         write('init.xyz',atoms,format='extxyz')
 
-def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz', GMIN=True):
+def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz', GMIN=True, substrate=None):
     '''
     Random structure generator
      - Gas phase
-     - Surface?
+     - Surface
     '''
     
     emt_element=['H', 'C', 'N', 'O', 'Al', 'Ni', 'Cu', 'Pd', 'Ag', 'Pt', 'Au']
@@ -114,8 +114,21 @@ def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz', GMIN=True
         atoms.calc=EMT()
         dyn = BFGS(atoms)
         dyn.run(fmax=0.01)
-    
-    write(f'{print_xyz}',atoms)
+        
+    if substrate is not None:
+        template=read(f'{substrate}')
+
+        admin=np.amin(atoms.get_positions()[:,2])
+        zmax=np.amax(template.get_positions()[:,2])
+        
+        atoms.positions[:,2]+=zmax-admin+d
+        atoms.positions+=template.get_cell()[0]/2.
+        atoms.positions+=template.get_cell()[1]/2.
+        
+        atoms+=template
+        write(f'{print_xyz}',atoms)
+    else:
+        write(f'{print_xyz}',atoms)
     
     if GMIN:
         np.savetxt('coords',atoms.get_positions(),fmt='%10.5f')
