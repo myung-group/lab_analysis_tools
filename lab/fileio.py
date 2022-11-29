@@ -91,7 +91,7 @@ def aqs_gen(pos_s=[[0.0,0.0,0.0]],mols='Cl',format='vasp',input=None):
     else: 
         write('init.xyz',atoms,format='extxyz')
 
-def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz'):
+def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz', GMIN=True):
     '''
     Random structure generator
      - Gas phase
@@ -116,5 +116,8 @@ def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz'):
         dyn.run(fmax=0.01)
     
     write(f'{print_xyz}',atoms)
+    
+    if GMIN:
+        np.savetxt('coords',atoms.get_positions(),fmt='%10.5f')
     
     return atoms
