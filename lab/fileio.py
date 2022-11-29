@@ -95,7 +95,7 @@ def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz', GMIN=True
     '''
     Random structure generator
      - Gas phase
-     - Surface
+     - Surface?
     '''
     
     emt_element=['H', 'C', 'N', 'O', 'Al', 'Ni', 'Cu', 'Pd', 'Ag', 'Pt', 'Au']
@@ -132,5 +132,17 @@ def random_str_generator(system=6*['Au'], d=3.0, print_xyz='init.xyz', GMIN=True
     
     if GMIN:
         np.savetxt('coords',atoms.get_positions(),fmt='%10.5f')
-    
+        #mass file write
+        with open("mass", 'w') as f:
+            for atom in atoms:
+                f.write(f'{atom.symbol} {atom.mass}\n')
+
+        #freezed substrate here
+        with open("freeze", 'w') as f:
+            for i,j in enumerate(range(len(system)+1, len(template)+1, 1)):
+                if i%10:
+                    f.write(f' {j} ')
+                else:
+                    f.write(f'\nFREEZE    ')
+                
     return atoms
